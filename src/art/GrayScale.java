@@ -4,28 +4,35 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import javax.imageio.ImageIO;
+import javax.swing.*;
 
 public class GrayScale {
+    private File input;
     private BufferedImage image;
+    private JLabel label;
+    private long percent;
     private boolean clean = false;
     private int width;
     private int height;
+    private int scale = 6;
 
-    private int scale = 3;
+    GrayScale(String path, JLabel label) {
+        input = new File(path);
+        this.label = label;
+        percent = 0;
+    }
 
-    public GrayScale() {
+    public void draw() {
         try {
-            File input = new File("a.jpg");
             image = ImageIO.read(input);
-            width = image.getWidth();
-            height = image.getHeight();
-
-            image = imageToBufferedImage(image.getScaledInstance(width / scale, height * 3 / 7 / scale, 0));
+            width = image.getWidth() / scale;
+            height = image.getHeight() * 3 / 7 / scale;
+            image = imageToBufferedImage(image.getScaledInstance(width, height, 0));
             AsciiChar asciiCh = new AsciiChar();
 
-            for (int i = 0; i < image.getHeight(); i++) {
+            for (int i = 0; i < height; i++) {
                 String string = "";
-                for (int j = 0; j < image.getWidth(); j++) {
+                for (int j = 0; j < width; j++) {
                     Color c = new Color(image.getRGB(j, i));
                     double red = c.getRed() * 0.299;
                     double green = c.getGreen() * 0.587;
@@ -33,16 +40,24 @@ public class GrayScale {
                     int greyScale = (int) (red + green + blue);
                     char ch = asciiCh.getCharacter(greyScale);
                     string += ch;
+                    percent = 100 * (i * width + j + 1) / (width * height);
+                    label.setText(percent + "%");
                 }
                 string += "\n";
                 addToFile(string);
             }
-        } catch (Exception e) {
-            System.out.println("Blad");
+        } catch (IOException e) {
+            label.setText(e.getMessage());
+        } finally {
+            try {
+                Thread.sleep(4000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public BufferedImage imageToBufferedImage(Image image) {
+    private BufferedImage imageToBufferedImage(Image image) {
         BufferedImage newImage = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB);
         Graphics g = newImage.getGraphics();
         g.drawImage(image, 0, 0, null);
@@ -50,13 +65,19 @@ public class GrayScale {
         return newImage;
     }
 
-    public void addToFile(String string) throws IOException {
-        File f = new File("ascii.txt");
+    private String parsePath() {
+        String path = input.getPath();
+        return path.substring(0, path.lastIndexOf('.')) + ".txt";
+    }
+
+    private void addToFile(String string) throws IOException {
+        String txtPath = parsePath();
+        File f = new File(txtPath);
         if (!clean && f.exists() && !f.isDirectory()) {
             f.delete();
             clean = true;
         }
-        FileWriter file = new FileWriter("ascii.txt", true);
+        FileWriter file = new FileWriter(txtPath, true);
         BufferedWriter out = new BufferedWriter(file);
         String updatedText = string.replaceAll("\n", System.lineSeparator());
         out.write(updatedText);
