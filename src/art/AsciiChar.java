@@ -9,12 +9,14 @@ public class AsciiChar {
     public AsciiChar() {
         size = 256;
         characters = new LinkedList<>();
+        characters.add('&');
+        characters.add('%');
         characters.add('#');
         characters.add('N');
         characters.add('F');
-        characters.add('I');
         characters.add('*');
         characters.add('=');
+        characters.add('?');
         characters.add('-');
         characters.add('.');
         characters.add(' ');
