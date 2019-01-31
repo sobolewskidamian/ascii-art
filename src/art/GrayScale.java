@@ -44,12 +44,15 @@ public class GrayScale {
                     int greyScale = (int) (red + green + blue);
                     char ch = asciiCh.getCharacter(greyScale);
                     string += ch;
-                    percent = 100 * (i * width + j + 1) / (width * height);
-                    label.setText(percent + "%");
+
+                    if (percent < 100)
+                        setPercentsToLabel(100 * (i * width + j + 1) / (width * height));
                 }
                 string += "\n";
                 addToFile(string);
             }
+            makePicture();
+            setPercentsToLabel(100);
         } catch (Exception e) {
             label.setText(e.getMessage());
         } finally {
@@ -61,6 +64,40 @@ public class GrayScale {
         }
     }
 
+    private void setPercentsToLabel(int p){
+        percent = p;
+        label.setText(percent + "%");
+    }
+
+    private void makePicture() throws IOException {
+        int fontSize = 11;
+        BufferedImage image = new BufferedImage(6 * width, 14 * height, BufferedImage.TYPE_INT_RGB);
+        for (int i = 0; i < 6 * width; i++)
+            for (int j = 0; j < 14 * height; j++)
+                image.setRGB(i, j, Color.white.getRGB());
+
+        Graphics g = image.getGraphics();
+        g.setFont(new Font("Consolas", Font.PLAIN, fontSize));
+        g.setColor(Color.black);
+        drawString(g, getTextFromFile(), 0, 0);
+        g.dispose();
+        ImageIO.write(image, "png", new File(fileNameWithoutExt() + "-ascii-pict.png"));
+    }
+
+    private String getTextFromFile() throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(new File(parsePathTxt())));
+        String text = "";
+        String s;
+        while ((s = br.readLine()) != null)
+            text += s + "\n";
+        return text;
+    }
+
+    private void drawString(Graphics g, String text, int x, int y) {
+        for (String line : text.split("\n"))
+            g.drawString(line, x, y += g.getFontMetrics().getHeight());
+    }
+
     private BufferedImage imageToBufferedImage(Image image) {
         BufferedImage newImage = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB);
         Graphics g = newImage.getGraphics();
@@ -69,13 +106,17 @@ public class GrayScale {
         return newImage;
     }
 
-    private String parsePath() {
+    private String fileNameWithoutExt() {
         String path = input.getPath();
-        return path.substring(0, path.lastIndexOf('.')) + ".txt";
+        return path.substring(0, path.lastIndexOf('.'));
+    }
+
+    private String parsePathTxt() {
+        return fileNameWithoutExt() + "-ascii-text.txt";
     }
 
     private void addToFile(String string) throws IOException {
-        String txtPath = parsePath();
+        String txtPath = parsePathTxt();
         File f = new File(txtPath);
         if (!clean && f.exists() && !f.isDirectory()) {
             f.delete();
