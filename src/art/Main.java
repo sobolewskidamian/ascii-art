@@ -13,6 +13,7 @@ public class Main {
         height = screenSize.height;
 
         JFrame frame = new JFrame();
+        frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(width, height);
         frame.setLayout(null);
