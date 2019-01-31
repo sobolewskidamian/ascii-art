@@ -14,16 +14,20 @@ public class GrayScale {
     private boolean clean = false;
     private int width;
     private int height;
-    private int scale = 6;
+    private String scaleString;
+    private int scale;
 
-    GrayScale(String path, JLabel label) {
+    GrayScale(String path, JLabel label, String scaleString) {
         input = new File(path);
         this.label = label;
+        this.scaleString = scaleString;
+        scale = 1;
         percent = 0;
     }
 
     public void draw() {
         try {
+            scale = Integer.parseInt(scaleString);
             image = ImageIO.read(input);
             width = image.getWidth() / scale;
             height = image.getHeight() * 3 / 7 / scale;
