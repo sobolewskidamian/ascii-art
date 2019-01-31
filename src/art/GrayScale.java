@@ -50,7 +50,7 @@ public class GrayScale {
                 string += "\n";
                 addToFile(string);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             label.setText(e.getMessage());
         } finally {
             try {
